@@ -10,7 +10,7 @@ import QrReader from "react-qr-scanner";
 const CheckIn = () => {
   const userId = JSON.parse(localStorage.getItem("userId"));
   const [startTime, setStartTime] = useState(null);
-  const [setEndTime] = useState(null);
+  const [endTime, setEndTime] = useState(null);
   const [timerOn, setTimerOn] = useState(false);
   const [loading] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -20,7 +20,7 @@ const CheckIn = () => {
   const [location, setLocation] = useState({ lat: null, long: null });
   const [scanResult, setScanResult] = useState("");
   const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [cameraPermission, setCameraPermission] = useState(true); // New state for camera permission
+  const [cameraPermission, setCameraPermission] = useState(true);
 
   useEffect(() => {
     const savedStartTime = localStorage.getItem("startTime");
@@ -39,7 +39,6 @@ const CheckIn = () => {
     }
     setTotalWorkingTime(savedTotalWorkingTime);
 
-    // Geolocation fetching
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setLocation({
@@ -74,6 +73,10 @@ const CheckIn = () => {
   }, []);
 
   useEffect(() => {
+    console.log("timerOn state updated:", timerOn);
+  }, [timerOn]);
+
+  useEffect(() => {
     if (startTime) {
       localStorage.setItem("startTime", startTime);
     } else {
@@ -82,6 +85,10 @@ const CheckIn = () => {
     localStorage.setItem("elapsedTime", elapsedTime);
     localStorage.setItem("totalWorkingTime", totalWorkingTime);
   }, [startTime, elapsedTime, timeSheetData, totalWorkingTime]);
+
+  useEffect(() => {
+    console.log("timerOn state updated:", timerOn);
+  }, [timerOn]);
 
   const startTimer = (start) => {
     const interval = setInterval(() => {
@@ -124,8 +131,8 @@ const CheckIn = () => {
       showToast("Unable to fetch your location. Please try again.");
       return;
     }
-
     setIsScannerOpen(true);
+
     const scanPromise = new Promise((resolve) => {
       const interval = setInterval(() => {
         if (scanResult) {
@@ -136,12 +143,11 @@ const CheckIn = () => {
     });
 
     const qrData = await scanPromise;
-
+    console.log("qrcodedata", qrData);
     if (!qrData) {
       showToast("QR code scan failed. Please try again.", "error");
       return;
     }
-
     setIsScannerOpen(false);
 
     const body = {
@@ -150,7 +156,7 @@ const CheckIn = () => {
         latitude: location.lat,
         longitude: location.long,
       },
-      qrData,
+      // qrData,
     };
 
     const response = await PostCall(`/clockin`, body);
@@ -159,10 +165,10 @@ const CheckIn = () => {
         const { timesheet } = response.data;
         const now = new Date();
         setStartTime(now);
+        setEndTime(null);
         setElapsedTime(0);
         startTimer(now);
         setTimeSheetData(timesheet.clockinTime);
-        showToast("Clocked in successfully!", "success");
       } else {
         showToast(response.data.message, "error");
       }
@@ -226,8 +232,8 @@ const CheckIn = () => {
           delay={300}
           onError={handleError}
           onScan={handleScan}
-          facingMode="environment"
           style={{ width: "400px", height: "400px" }}
+          constraints={{ aspectRatio: 1, facingMode: { ideal: "environment" } }}
         />
       )}
 
