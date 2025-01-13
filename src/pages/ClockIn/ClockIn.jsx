@@ -20,7 +20,7 @@ const CheckIn = () => {
   const [location, setLocation] = useState({ lat: null, long: null });
   const [scanResult, setScanResult] = useState("");
   const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [cameraPermission, setCameraPermission] = useState(true); // New state for camera permission
+  const [cameraPermission, setCameraPermission] = useState(true);
 
   useEffect(() => {
     const savedStartTime = localStorage.getItem("startTime");
@@ -39,7 +39,6 @@ const CheckIn = () => {
     }
     setTotalWorkingTime(savedTotalWorkingTime);
 
-    // Geolocation fetching
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setLocation({
@@ -58,7 +57,9 @@ const CheckIn = () => {
       try {
         if (response?.data?.status === 200) {
           setTimeSheetData(response?.data?.timesheet?.clockinTime);
+          // console.log("response", response?.data?.timesheet?.isTimerOn);
           setTimerOn(response?.data?.timesheet?.isTimerOn);
+          // console.log("timeron", timerOn);
           setTotalWorkingTime(response?.data?.timesheet?.totalHours);
         } else {
           if (response?.data?.message !== "Record is not found!") {
@@ -66,6 +67,7 @@ const CheckIn = () => {
           }
         }
       } catch (error) {
+        // console.log("error", error);
         showToast(response?.data?.message, "error");
       }
     };
@@ -75,6 +77,7 @@ const CheckIn = () => {
 
   useEffect(() => {
     if (startTime) {
+      console.log("starttime", startTime);
       localStorage.setItem("startTime", startTime);
     } else {
       localStorage.removeItem("startTime");
@@ -83,11 +86,16 @@ const CheckIn = () => {
     localStorage.setItem("totalWorkingTime", totalWorkingTime);
   }, [startTime, elapsedTime, timeSheetData, totalWorkingTime]);
 
+  useEffect(() => {
+    console.log("timerOn state updated:", timerOn);
+  }, [timerOn]);
+
   const startTimer = (start) => {
     const interval = setInterval(() => {
       setElapsedTime(Math.floor((Date.now() - start.getTime()) / 1000));
     }, 1000);
     setTimerInterval(interval);
+    console.log("intervel", interval);
   };
 
   const handleError = (err) => {
@@ -126,6 +134,7 @@ const CheckIn = () => {
     }
 
     setIsScannerOpen(true);
+
     const scanPromise = new Promise((resolve) => {
       const interval = setInterval(() => {
         if (scanResult) {
@@ -226,7 +235,7 @@ const CheckIn = () => {
           delay={300}
           onError={handleError}
           onScan={handleScan}
-          style={{ width: "400px", height: "400px" }}
+          style={{ width: "100%", height: "100%" }}
         />
       )}
 
