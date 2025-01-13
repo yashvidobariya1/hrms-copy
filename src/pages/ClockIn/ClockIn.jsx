@@ -94,8 +94,10 @@ const CheckIn = () => {
 
   const checkCameraPermission = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      stream.getTracks().forEach((track) => track.stop()); // Stop the camera after checking
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: isBackCamera ? "environment" : "user" },
+      });
+      stream.getTracks().forEach((track) => track.stop());
       return true;
     } catch (err) {
       showToast(
