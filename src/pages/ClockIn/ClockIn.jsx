@@ -20,6 +20,7 @@ const CheckIn = () => {
   const [location, setLocation] = useState({ lat: null, long: null });
   const [scanResult, setScanResult] = useState("");
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [cameraPermission, setCameraPermission] = useState(true); // New state for camera permission
 
   useEffect(() => {
     const savedStartTime = localStorage.getItem("startTime");
@@ -38,6 +39,7 @@ const CheckIn = () => {
     }
     setTotalWorkingTime(savedTotalWorkingTime);
 
+    // Geolocation fetching
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setLocation({
@@ -47,7 +49,7 @@ const CheckIn = () => {
       },
       (error) => {
         console.error("Error fetching location:", error);
-        showToast(error.message, "error");
+        showToast(error, "error");
       }
     );
 
@@ -81,10 +83,6 @@ const CheckIn = () => {
     localStorage.setItem("totalWorkingTime", totalWorkingTime);
   }, [startTime, elapsedTime, timeSheetData, totalWorkingTime]);
 
-  useEffect(() => {
-    console.log("timerOn state updated:", timerOn);
-  }, [timerOn]);
-
   const startTimer = (start) => {
     const interval = setInterval(() => {
       setElapsedTime(Math.floor((Date.now() - start.getTime()) / 1000));
@@ -92,72 +90,85 @@ const CheckIn = () => {
     setTimerInterval(interval);
   };
 
-  const checkCameraPermission = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: isBackCamera ? "environment" : "user" },
-      });
-      stream.getTracks().forEach((track) => track.stop());
-      return true;
-    } catch (err) {
-      showToast(
-        "Camera permission denied. Please allow camera access.",
-        "error"
-      );
-      return false;
-    }
+  const handleError = (err) => {
+    console.error(err);
   };
 
   const handleScan = (data) => {
     if (data) {
       setScanResult(data.text);
       setIsScannerOpen(false);
-      const now = new Date();
-      setStartTime(now);
-      setElapsedTime(0);
-      startTimer(now);
-      showToast("QR Code scanned successfully.", "success");
     }
   };
 
-  const handleError = (err) => {
-    console.error(err);
-    showToast("Error accessing camera: " + err.message, "error");
+  const checkCameraPermission = () => {
+    navigator.permissions.query({ name: "camera" }).then((permissionStatus) => {
+      if (permissionStatus.state === "granted") {
+        setCameraPermission(true);
+      } else {
+        setCameraPermission(false);
+        showToast("Please allow camera access to scan the QR code", "error");
+      }
+    });
   };
 
   const handleClockIn = async () => {
-    const permissionGranted = await checkCameraPermission();
-    if (!permissionGranted) return;
+    checkCameraPermission();
+
+    if (!cameraPermission) {
+      showToast("Please allow camera access before clocking in.", "error");
+      return;
+    }
 
     if (!location.lat || !location.long) {
-      showToast("Unable to fetch your location. Please try again.", "error");
+      showToast("Unable to fetch your location. Please try again.");
       return;
     }
 
     setIsScannerOpen(true);
+    const scanPromise = new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if (scanResult) {
+          clearInterval(interval);
+          resolve(scanResult);
+        }
+      }, 500);
+    });
+
+    const qrData = await scanPromise;
+
+    if (!qrData) {
+      showToast("QR code scan failed. Please try again.", "error");
+      return;
+    }
+
+    setIsScannerOpen(false);
+
     const body = {
       userId,
       location: {
         latitude: location.lat,
         longitude: location.long,
       },
+      qrData,
     };
+
     const response = await PostCall(`/clockin`, body);
     try {
       if (response.data.status === 200) {
         const { timesheet } = response.data;
         const now = new Date();
         setStartTime(now);
-        setEndTime(null);
         setElapsedTime(0);
         startTimer(now);
         setTimeSheetData(timesheet.clockinTime);
+        showToast("Clocked in successfully!", "success");
       } else {
         showToast(response.data.message, "error");
       }
     } catch (error) {
       console.error("Error while clocking in:", error);
-      showToast(error.message, "error");
+      showToast(error, "error");
     }
   };
 
@@ -182,17 +193,19 @@ const CheckIn = () => {
         setTimerInterval(null);
         setTimeSheetData(timesheet.clockinTime);
         setTotalWorkingTime(timesheet.totalHours);
+
         setStartTime(null);
         setElapsedTime(0);
         localStorage.removeItem("startTime");
         localStorage.removeItem("elapsedTime");
+
         showToast(response?.data?.message, "success");
       } else {
         showToast(response?.data?.message, "error");
       }
     } catch (error) {
       console.error("Error clocking out:", error);
-      showToast(error.message, "error");
+      showToast(response?.data?.message);
     }
   };
 
@@ -213,11 +226,13 @@ const CheckIn = () => {
           delay={300}
           onError={handleError}
           onScan={handleScan}
+          facingMode="environment"
           style={{ width: "400px", height: "400px" }}
         />
       )}
 
       {scanResult && <p>QR Code Data: {scanResult}</p>}
+
       <div className="button-container">
         <button onClick={handleClockIn} className="clock-in-btn">
           Clock In
@@ -270,7 +285,7 @@ const CheckIn = () => {
           </tbody>
         </table>
       ) : (
-        <div className="no-data-wrapper">{/* <p>No data available</p> */}</div>
+        <div className="no-data-wrapper"></div>
       )}
     </div>
   );
