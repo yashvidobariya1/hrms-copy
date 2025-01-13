@@ -233,7 +233,7 @@ const CheckIn = () => {
           onError={handleError}
           onScan={handleScan}
           style={{ width: "400px", height: "400px" }}
-          constraints={{ aspectRatio: 1, facingMode: { ideal: "environment" } }}
+          facingMode="environment"
         />
       )}
 
