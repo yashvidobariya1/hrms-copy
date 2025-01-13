@@ -16,7 +16,7 @@ const Viewhours = () => {
     });
 
     const success = (result) => {
-      setScanResult(result); // Set the scanned result
+      setScanResult(result);
       setIsScannerVisible(false); // Hide the scanner after successful scan
       scanner.clear(); // Stop the scanner after a successful scan
     };
@@ -25,10 +25,8 @@ const Viewhours = () => {
       console.warn("QR Scanner Error:", err);
     };
 
-    // Start the scanner
     scanner.render(success, error);
 
-    // Cleanup function to stop scanner on unmount
     return () => {
       scanner.clear();
     };
@@ -37,11 +35,9 @@ const Viewhours = () => {
   return (
     <div>
       <h1>QR Scanner</h1>
-      {/* Conditionally render the scanner */}
       {isScannerVisible && (
         <div id="render" style={{ width: "150px", height: "150px" }}></div>
       )}
-      {/* Display the scanned result */}
       {scanResult && <p>Scanned Result: {scanResult}</p>}
     </div>
   );

@@ -5,8 +5,7 @@ import moment from "moment";
 import "./ClockIn.css";
 import { BsHourglassSplit } from "react-icons/bs";
 import Loader from "../Helper/Loader";
-import QrReader from "react-qr-scanner";
-import Viewhours from "../ViewHours/Viewhours";
+import { Html5QrcodeScanner } from "html5-qrcode";
 
 const CheckIn = () => {
   const userId = JSON.parse(localStorage.getItem("userId"));
@@ -19,6 +18,8 @@ const CheckIn = () => {
   const [timeSheetData, setTimeSheetData] = useState([]);
   const [totalWorkingTime, setTotalWorkingTime] = useState("0h 0m 0s");
   const [location, setLocation] = useState({ lat: null, long: null });
+  const [scanResult, setScanResult] = useState("");
+  const [isScannerVisible, setIsScannerVisible] = useState(true);
 
   useEffect(() => {
     const savedStartTime = localStorage.getItem("startTime");
@@ -32,6 +33,7 @@ const CheckIn = () => {
         Math.floor((Date.now() - savedTime.getTime()) / 1000) +
         Number(savedElapsedTime || 0);
       setStartTime(savedTime);
+      console.log("starttime");
       setElapsedTime(currentElapsed);
       startTimer(savedTime);
     }
@@ -76,16 +78,19 @@ const CheckIn = () => {
 
   useEffect(() => {
     if (startTime) {
+      // Only start the timer if both startTime and scanResult are available
       localStorage.setItem("startTime", startTime);
+      localStorage.setItem("elapsedTime", elapsedTime);
+      localStorage.setItem("totalWorkingTime", totalWorkingTime);
+      console.log("Timer started with startTime:", startTime);
     } else {
       localStorage.removeItem("startTime");
     }
-    localStorage.setItem("elapsedTime", elapsedTime);
-    localStorage.setItem("totalWorkingTime", totalWorkingTime);
-  }, [startTime, elapsedTime, timeSheetData, totalWorkingTime]);
+  }, [startTime, elapsedTime, totalWorkingTime]);
 
   useEffect(() => {
     console.log("timerOn state updated:", timerOn);
+    console.log("usereefct time on");
   }, [timerOn]);
 
   const startTimer = (start) => {
@@ -95,7 +100,49 @@ const CheckIn = () => {
     setTimerInterval(interval);
   };
 
+  const scanner = () => {
+    setIsScannerVisible(true);
+
+    setTimeout(() => {
+      navigator.permissions
+        .query({ name: "camera" })
+        .then((permissionStatus) => {
+          if (permissionStatus.state === "granted") {
+            const scanner = new Html5QrcodeScanner("scanner-visible", {
+              qrbox: { width: 600, height: 600 },
+              fps: 5,
+            });
+
+            const success = (result) => {
+              setScanResult(result);
+              setIsScannerVisible(false);
+              scanner.clear();
+            };
+
+            const error = (err) => {
+              console.warn("QR Scanner Error:", err);
+            };
+
+            scanner.render(success, error);
+          } else {
+            showToast(
+              "Camera permission is required to scan QR code.",
+              "error"
+            );
+          }
+        })
+        .catch((err) => {
+          console.error("Error checking camera permission:", err);
+          showToast(
+            "An error occurred while checking camera permissions.",
+            "error"
+          );
+        });
+    }, 0); // Ensure DOM updates before scanner initialization
+  };
+
   const handleClockIn = async () => {
+    scanner();
     if (!location.lat || !location.long) {
       showToast("Unable to fetch your location. Please try again.");
       return;
@@ -110,22 +157,22 @@ const CheckIn = () => {
       // qrData,
     };
 
-    const response = await PostCall(`/clockin`, body);
+    // const response = await PostCall(`/clockin`, body);
     try {
-      if (response.data.status === 200) {
-        const { timesheet } = response.data;
-        const now = new Date();
-        setStartTime(now);
-        setEndTime(null);
-        setElapsedTime(0);
-        startTimer(now);
-        setTimeSheetData(timesheet.clockinTime);
-      } else {
-        showToast(response.data.message, "error");
-      }
+      // if (response.data.status === 200) {
+      //   const { timesheet } = response.data;
+      const now = new Date();
+      setStartTime(now);
+      setEndTime(null);
+      setElapsedTime(0);
+      startTimer(now);
+      // setTimeSheetData(timesheet.clockinTime);
+      // } else {
+      //   showToast(response.data.message, "error");
+      // }
     } catch (error) {
       console.error("Error while clocking in:", error);
-      showToast(error, "error");
+      // showToast(error, "error");
     }
   };
 
@@ -144,25 +191,25 @@ const CheckIn = () => {
     };
     const response = await PostCall(`/clockout`, body);
     try {
-      if (response.data.status === 200) {
-        const { timesheet } = response?.data;
-        clearInterval(timerInterval);
-        setTimerInterval(null);
-        setTimeSheetData(timesheet.clockinTime);
-        setTotalWorkingTime(timesheet.totalHours);
+      // if (response.data.status === 200) {
+      //   const { timesheet } = response?.data;
+      clearInterval(timerInterval);
+      // setTimerInterval(null);
+      // setTimeSheetData(timesheet.clockinTime);
+      // setTotalWorkingTime(timesheet.totalHours);
 
-        setStartTime(null);
-        setElapsedTime(0);
-        localStorage.removeItem("startTime");
-        localStorage.removeItem("elapsedTime");
+      setStartTime(null);
+      setElapsedTime(0);
+      localStorage.removeItem("startTime");
+      localStorage.removeItem("elapsedTime");
 
-        showToast(response?.data?.message, "success");
-      } else {
-        showToast(response?.data?.message, "error");
-      }
+      showToast(response?.data?.message, "success");
+      // } else {
+      //   showToast(response?.data?.message, "error");
+      // }
     } catch (error) {
       console.error("Error clocking out:", error);
-      showToast(response?.data?.message);
+      // showToast(response?.data?.message);
     }
   };
 
@@ -178,8 +225,9 @@ const CheckIn = () => {
       <h2 style={{ textAlign: "center", color: "#555" }}>
         {moment().format("llll")}
       </h2>
-      <Viewhours />
+      {isScannerVisible && <div id="scanner-visible"></div>}
 
+      {scanResult && <p>Scanned Result: {scanResult}</p>}
       <div className="button-container">
         <button onClick={handleClockIn} className="clock-in-btn">
           Clock In

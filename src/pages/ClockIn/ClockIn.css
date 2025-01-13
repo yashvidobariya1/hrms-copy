@@ -60,6 +60,35 @@
   color: var(--neutral-light-gray);
 }
 
+#scanner-visible {
+  width: 100%;
+}
+
+#html5-qrcode-button-camera-stop {
+  display: none !important;
+}
+#scanner-visible__dashboard_section {
+  padding: 0 !important;
+}
+#qr-shaded-region {
+  border-width: 100% !important;
+}
+@media (max-width: 768px) {
+  #render {
+    width: 100px;
+    height: 100px;
+    border-radius: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  #render {
+    width: 80px;
+    height: 80px;
+    border-radius: 5px;
+  }
+}
+
 @media (max-width: 500px) {
   .clockin-dropdown-menu {
     white-space: nowrap;
