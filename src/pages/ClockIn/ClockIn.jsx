@@ -6,6 +6,7 @@ import "./ClockIn.css";
 import { BsHourglassSplit } from "react-icons/bs";
 import Loader from "../Helper/Loader";
 import { Html5QrcodeScanner } from "html5-qrcode";
+import { isMobile } from "react-device-detect"; // Importing isMobile from react-device-detect
 
 const CheckIn = () => {
   const userId = JSON.parse(localStorage.getItem("userId"));
@@ -33,7 +34,6 @@ const CheckIn = () => {
         Math.floor((Date.now() - savedTime.getTime()) / 1000) +
         Number(savedElapsedTime || 0);
       setStartTime(savedTime);
-      console.log("starttime");
       setElapsedTime(currentElapsed);
       startTimer(savedTime);
     }
@@ -76,7 +76,6 @@ const CheckIn = () => {
       localStorage.setItem("startTime", startTime);
       localStorage.setItem("elapsedTime", elapsedTime);
       localStorage.setItem("totalWorkingTime", totalWorkingTime);
-      console.log("Timer started with startTime:", startTime);
     } else {
       localStorage.removeItem("startTime");
     }
@@ -84,7 +83,6 @@ const CheckIn = () => {
 
   useEffect(() => {
     console.log("timerOn state updated:", timerOn);
-    console.log("useeffect time on");
   }, [timerOn]);
 
   const startTimer = (start) => {
@@ -113,7 +111,6 @@ const CheckIn = () => {
 
               const success = (result) => {
                 setScanResult(result);
-                console.log("await result", scanResult);
                 setIsScannerVisible(false);
                 scannerInstance.clear();
                 resolve(result);
@@ -147,8 +144,6 @@ const CheckIn = () => {
 
     try {
       const scanResult = await scanner();
-      console.log("Scan Result:", scanResult);
-
       const body = {
         userId,
         location: {
@@ -157,7 +152,6 @@ const CheckIn = () => {
         },
         qrData: scanResult,
       };
-
       const response = await PostCall(`/clockin`, body);
       if (response.data.status === 200) {
         const { timesheet } = response.data;
@@ -225,7 +219,9 @@ const CheckIn = () => {
       <h2 style={{ textAlign: "center", color: "#555" }}>
         {moment().format("llll")}
       </h2>
-      {isScannerVisible && <div id="scanner-visible"></div>}
+
+      {/* Render scanner only on mobile devices */}
+      {isMobile && isScannerVisible && <div id="scanner-visible"></div>}
 
       {scanResult && <p>Scanned Result: {scanResult}</p>}
       <div className="button-container">
