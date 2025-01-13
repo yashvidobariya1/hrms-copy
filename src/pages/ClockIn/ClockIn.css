@@ -70,24 +70,6 @@
 #scanner-visible__dashboard_section {
   padding: 0 !important;
 }
-#qr-shaded-region {
-  border-width: 100% !important;
-}
-@media (max-width: 768px) {
-  #render {
-    width: 100px;
-    height: 100px;
-    border-radius: 5px;
-  }
-}
-
-@media (max-width: 480px) {
-  #render {
-    width: 80px;
-    height: 80px;
-    border-radius: 5px;
-  }
-}
 
 @media (max-width: 500px) {
   .clockin-dropdown-menu {

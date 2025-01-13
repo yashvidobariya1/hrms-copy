@@ -47,7 +47,7 @@ const CheckIn = () => {
         });
       },
       (error) => {
-        console.error("Error fetching location:", error);
+        console.error("Error fetching location:");
         showToast(error, "error");
       }
     );
@@ -68,17 +68,11 @@ const CheckIn = () => {
         showToast(response?.data?.message, "error");
       }
     };
-
     fetchTimesheet();
   }, []);
 
   useEffect(() => {
-    console.log("timerOn state updated:", timerOn);
-  }, [timerOn]);
-
-  useEffect(() => {
     if (startTime) {
-      // Only start the timer if both startTime and scanResult are available
       localStorage.setItem("startTime", startTime);
       localStorage.setItem("elapsedTime", elapsedTime);
       localStorage.setItem("totalWorkingTime", totalWorkingTime);
@@ -90,7 +84,7 @@ const CheckIn = () => {
 
   useEffect(() => {
     console.log("timerOn state updated:", timerOn);
-    console.log("usereefct time on");
+    console.log("useeffect time on");
   }, [timerOn]);
 
   const startTimer = (start) => {
@@ -101,78 +95,84 @@ const CheckIn = () => {
   };
 
   const scanner = () => {
-    setIsScannerVisible(true);
+    return new Promise((resolve, reject) => {
+      setIsScannerVisible(true);
 
-    setTimeout(() => {
-      navigator.permissions
-        .query({ name: "camera" })
-        .then((permissionStatus) => {
-          if (permissionStatus.state === "granted") {
-            const scanner = new Html5QrcodeScanner("scanner-visible", {
-              qrbox: { width: 600, height: 600 },
-              fps: 5,
-            });
+      setTimeout(() => {
+        navigator.permissions
+          .query({ name: "camera" })
+          .then((permissionStatus) => {
+            if (permissionStatus.state === "granted") {
+              const scannerInstance = new Html5QrcodeScanner(
+                "scanner-visible",
+                {
+                  qrbox: { width: "100%", height: "100%" },
+                  fps: 5,
+                }
+              );
 
-            const success = (result) => {
-              setScanResult(result);
-              setIsScannerVisible(false);
-              scanner.clear();
-            };
+              const success = (result) => {
+                setScanResult(result);
+                console.log("await result", scanResult);
+                setIsScannerVisible(false);
+                scannerInstance.clear();
+                resolve(result);
+              };
 
-            const error = (err) => {
-              console.warn("QR Scanner Error:", err);
-            };
-
-            scanner.render(success, error);
-          } else {
+              scannerInstance.render(success);
+            } else {
+              const errorMessage =
+                "Camera permission is required to scan QR code.";
+              showToast(errorMessage, "error");
+              reject(new Error(errorMessage));
+            }
+          })
+          .catch((err) => {
+            console.error("Error checking camera permission:", err);
             showToast(
-              "Camera permission is required to scan QR code.",
+              "An error occurred while checking camera permissions.",
               "error"
             );
-          }
-        })
-        .catch((err) => {
-          console.error("Error checking camera permission:", err);
-          showToast(
-            "An error occurred while checking camera permissions.",
-            "error"
-          );
-        });
-    }, 0); // Ensure DOM updates before scanner initialization
+            reject(err);
+          });
+      }, 0);
+    });
   };
 
   const handleClockIn = async () => {
-    scanner();
     if (!location.lat || !location.long) {
       showToast("Unable to fetch your location. Please try again.");
       return;
     }
 
-    const body = {
-      userId,
-      location: {
-        latitude: location.lat,
-        longitude: location.long,
-      },
-      // qrData,
-    };
-
-    // const response = await PostCall(`/clockin`, body);
     try {
-      // if (response.data.status === 200) {
-      //   const { timesheet } = response.data;
-      const now = new Date();
-      setStartTime(now);
-      setEndTime(null);
-      setElapsedTime(0);
-      startTimer(now);
-      // setTimeSheetData(timesheet.clockinTime);
-      // } else {
-      //   showToast(response.data.message, "error");
-      // }
+      const scanResult = await scanner();
+      console.log("Scan Result:", scanResult);
+
+      const body = {
+        userId,
+        location: {
+          latitude: location.lat,
+          longitude: location.long,
+        },
+        qrData: scanResult,
+      };
+
+      const response = await PostCall(`/clockin`, body);
+      if (response.data.status === 200) {
+        const { timesheet } = response.data;
+        const now = new Date();
+        setStartTime(now);
+        setEndTime(null);
+        setElapsedTime(0);
+        startTimer(now);
+        setTimeSheetData(timesheet.clockinTime);
+      } else {
+        showToast(response.data.message, "error");
+      }
     } catch (error) {
-      console.error("Error while clocking in:", error);
-      // showToast(error, "error");
+      console.error("Error during clock-in process:", error);
+      showToast("Failed to clock in. Please try again.", "error");
     }
   };
 
@@ -191,25 +191,25 @@ const CheckIn = () => {
     };
     const response = await PostCall(`/clockout`, body);
     try {
-      // if (response.data.status === 200) {
-      //   const { timesheet } = response?.data;
-      clearInterval(timerInterval);
-      // setTimerInterval(null);
-      // setTimeSheetData(timesheet.clockinTime);
-      // setTotalWorkingTime(timesheet.totalHours);
+      if (response.data.status === 200) {
+        const { timesheet } = response?.data;
+        clearInterval(timerInterval);
+        setTimerInterval(null);
+        setTimeSheetData(timesheet.clockinTime);
+        setTotalWorkingTime(timesheet.totalHours);
 
-      setStartTime(null);
-      setElapsedTime(0);
-      localStorage.removeItem("startTime");
-      localStorage.removeItem("elapsedTime");
+        setStartTime(null);
+        setElapsedTime(0);
+        localStorage.removeItem("startTime");
+        localStorage.removeItem("elapsedTime");
 
-      showToast(response?.data?.message, "success");
-      // } else {
-      //   showToast(response?.data?.message, "error");
-      // }
+        showToast(response?.data?.message, "success");
+      } else {
+        showToast(response?.data?.message, "error");
+      }
     } catch (error) {
       console.error("Error clocking out:", error);
-      // showToast(response?.data?.message);
+      showToast(response?.data?.message);
     }
   };
 
