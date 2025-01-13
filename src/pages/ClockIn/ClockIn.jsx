@@ -20,7 +20,6 @@ const CheckIn = () => {
   const [location, setLocation] = useState({ lat: null, long: null });
   const [scanResult, setScanResult] = useState("");
   const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [cameraPermission, setCameraPermission] = useState(true);
 
   useEffect(() => {
     const savedStartTime = localStorage.getItem("startTime");
@@ -48,7 +47,7 @@ const CheckIn = () => {
       },
       (error) => {
         console.error("Error fetching location:", error);
-        showToast(error, "error");
+        showToast(error.message, "error");
       }
     );
 
@@ -57,9 +56,7 @@ const CheckIn = () => {
       try {
         if (response?.data?.status === 200) {
           setTimeSheetData(response?.data?.timesheet?.clockinTime);
-          // console.log("response", response?.data?.timesheet?.isTimerOn);
           setTimerOn(response?.data?.timesheet?.isTimerOn);
-          // console.log("timeron", timerOn);
           setTotalWorkingTime(response?.data?.timesheet?.totalHours);
         } else {
           if (response?.data?.message !== "Record is not found!") {
@@ -67,7 +64,6 @@ const CheckIn = () => {
           }
         }
       } catch (error) {
-        // console.log("error", error);
         showToast(response?.data?.message, "error");
       }
     };
@@ -77,7 +73,6 @@ const CheckIn = () => {
 
   useEffect(() => {
     if (startTime) {
-      console.log("starttime", startTime);
       localStorage.setItem("startTime", startTime);
     } else {
       localStorage.removeItem("startTime");
@@ -95,89 +90,72 @@ const CheckIn = () => {
       setElapsedTime(Math.floor((Date.now() - start.getTime()) / 1000));
     }, 1000);
     setTimerInterval(interval);
-    console.log("intervel", interval);
   };
 
-  const handleError = (err) => {
-    console.error(err);
+  const checkCameraPermission = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach((track) => track.stop()); // Stop the camera after checking
+      return true;
+    } catch (err) {
+      showToast(
+        "Camera permission denied. Please allow camera access.",
+        "error"
+      );
+      return false;
+    }
   };
 
   const handleScan = (data) => {
     if (data) {
       setScanResult(data.text);
       setIsScannerOpen(false);
+      const now = new Date();
+      setStartTime(now);
+      setElapsedTime(0);
+      startTimer(now);
+      showToast("QR Code scanned successfully.", "success");
     }
   };
 
-  const checkCameraPermission = () => {
-    navigator.permissions.query({ name: "camera" }).then((permissionStatus) => {
-      if (permissionStatus.state === "granted") {
-        setCameraPermission(true);
-      } else {
-        setCameraPermission(false);
-        showToast("Please allow camera access to scan the QR code", "error");
-      }
-    });
+  const handleError = (err) => {
+    console.error(err);
+    showToast("Error accessing camera: " + err.message, "error");
   };
 
   const handleClockIn = async () => {
-    checkCameraPermission();
-
-    if (!cameraPermission) {
-      showToast("Please allow camera access before clocking in.", "error");
-      return;
-    }
+    const permissionGranted = await checkCameraPermission();
+    if (!permissionGranted) return;
 
     if (!location.lat || !location.long) {
-      showToast("Unable to fetch your location. Please try again.");
+      showToast("Unable to fetch your location. Please try again.", "error");
       return;
     }
 
     setIsScannerOpen(true);
-
-    const scanPromise = new Promise((resolve) => {
-      const interval = setInterval(() => {
-        if (scanResult) {
-          clearInterval(interval);
-          resolve(scanResult);
-        }
-      }, 500);
-    });
-
-    const qrData = await scanPromise;
-
-    if (!qrData) {
-      showToast("QR code scan failed. Please try again.", "error");
-      return;
-    }
-
-    setIsScannerOpen(false);
-
     const body = {
       userId,
       location: {
         latitude: location.lat,
         longitude: location.long,
       },
-      qrData,
     };
-
     const response = await PostCall(`/clockin`, body);
     try {
       if (response.data.status === 200) {
         const { timesheet } = response.data;
         const now = new Date();
         setStartTime(now);
+        setEndTime(null);
         setElapsedTime(0);
         startTimer(now);
         setTimeSheetData(timesheet.clockinTime);
-        showToast("Clocked in successfully!", "success");
       } else {
         showToast(response.data.message, "error");
       }
     } catch (error) {
       console.error("Error while clocking in:", error);
-      showToast(error, "error");
+      showToast(error.message, "error");
     }
   };
 
@@ -202,19 +180,17 @@ const CheckIn = () => {
         setTimerInterval(null);
         setTimeSheetData(timesheet.clockinTime);
         setTotalWorkingTime(timesheet.totalHours);
-
         setStartTime(null);
         setElapsedTime(0);
         localStorage.removeItem("startTime");
         localStorage.removeItem("elapsedTime");
-
         showToast(response?.data?.message, "success");
       } else {
         showToast(response?.data?.message, "error");
       }
     } catch (error) {
       console.error("Error clocking out:", error);
-      showToast(response?.data?.message);
+      showToast(error.message, "error");
     }
   };
 
@@ -235,12 +211,11 @@ const CheckIn = () => {
           delay={300}
           onError={handleError}
           onScan={handleScan}
-          style={{ width: "100%", height: "100%" }}
+          style={{ width: "400px", height: "400px" }}
         />
       )}
 
       {scanResult && <p>QR Code Data: {scanResult}</p>}
-
       <div className="button-container">
         <button onClick={handleClockIn} className="clock-in-btn">
           Clock In
@@ -293,7 +268,7 @@ const CheckIn = () => {
           </tbody>
         </table>
       ) : (
-        <div className="no-data-wrapper"></div>
+        <div className="no-data-wrapper">{/* <p>No data available</p> */}</div>
       )}
     </div>
   );
