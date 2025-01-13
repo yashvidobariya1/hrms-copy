@@ -219,11 +219,8 @@ const CheckIn = () => {
       <h2 style={{ textAlign: "center", color: "#555" }}>
         {moment().format("llll")}
       </h2>
-
-      {/* Render scanner only on mobile devices */}
       {isMobile && isScannerVisible && <div id="scanner-visible"></div>}
 
-      {scanResult && <p>Scanned Result: {scanResult}</p>}
       <div className="button-container">
         <button onClick={handleClockIn} className="clock-in-btn">
           Clock In
