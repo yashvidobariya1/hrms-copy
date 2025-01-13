@@ -143,7 +143,12 @@ const CheckIn = () => {
     }
 
     try {
-      const scanResult = await scanner();
+      let scanResult = "";
+      if (isMobile) {
+        scanResult = await scanner();
+      } else {
+        scanResult = "default-scan-result";
+      }
       const body = {
         userId,
         location: {
@@ -219,6 +224,8 @@ const CheckIn = () => {
       <h2 style={{ textAlign: "center", color: "#555" }}>
         {moment().format("llll")}
       </h2>
+
+      {/* Display QR scanner only if on mobile */}
       {isMobile && isScannerVisible && <div id="scanner-visible"></div>}
 
       <div className="button-container">
