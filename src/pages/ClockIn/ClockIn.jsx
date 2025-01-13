@@ -6,6 +6,7 @@ import "./ClockIn.css";
 import { BsHourglassSplit } from "react-icons/bs";
 import Loader from "../Helper/Loader";
 import QrReader from "react-qr-scanner";
+import Viewhours from "../ViewHours/Viewhours";
 
 const CheckIn = () => {
   const userId = JSON.parse(localStorage.getItem("userId"));
@@ -18,9 +19,6 @@ const CheckIn = () => {
   const [timeSheetData, setTimeSheetData] = useState([]);
   const [totalWorkingTime, setTotalWorkingTime] = useState("0h 0m 0s");
   const [location, setLocation] = useState({ lat: null, long: null });
-  const [scanResult, setScanResult] = useState("");
-  const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [cameraPermission, setCameraPermission] = useState(true);
 
   useEffect(() => {
     const savedStartTime = localStorage.getItem("startTime");
@@ -97,58 +95,11 @@ const CheckIn = () => {
     setTimerInterval(interval);
   };
 
-  const handleError = (err) => {
-    console.error(err);
-  };
-
-  const handleScan = (data) => {
-    if (data) {
-      setScanResult(data.text);
-      setIsScannerOpen(false);
-    }
-  };
-
-  const checkCameraPermission = () => {
-    navigator.permissions.query({ name: "camera" }).then((permissionStatus) => {
-      if (permissionStatus.state === "granted") {
-        setCameraPermission(true);
-      } else {
-        setCameraPermission(false);
-        showToast("Please allow camera access to scan the QR code", "error");
-      }
-    });
-  };
-
   const handleClockIn = async () => {
-    checkCameraPermission();
-
-    if (!cameraPermission) {
-      showToast("Please allow camera access before clocking in.", "error");
-      return;
-    }
-
     if (!location.lat || !location.long) {
       showToast("Unable to fetch your location. Please try again.");
       return;
     }
-    setIsScannerOpen(true);
-
-    const scanPromise = new Promise((resolve) => {
-      const interval = setInterval(() => {
-        if (scanResult) {
-          clearInterval(interval);
-          resolve(scanResult);
-        }
-      }, 500);
-    });
-
-    const qrData = await scanPromise;
-    console.log("qrcodedata", qrData);
-    if (!qrData) {
-      showToast("QR code scan failed. Please try again.", "error");
-      return;
-    }
-    setIsScannerOpen(false);
 
     const body = {
       userId,
@@ -227,17 +178,7 @@ const CheckIn = () => {
       <h2 style={{ textAlign: "center", color: "#555" }}>
         {moment().format("llll")}
       </h2>
-      {isScannerOpen && (
-        <QrReader
-          delay={300}
-          onError={handleError}
-          onScan={handleScan}
-          style={{ width: "400px", height: "400px" }}
-          facingMode="environment"
-        />
-      )}
-
-      {scanResult && <p>QR Code Data: {scanResult}</p>}
+      <Viewhours />
 
       <div className="button-container">
         <button onClick={handleClockIn} className="clock-in-btn">
