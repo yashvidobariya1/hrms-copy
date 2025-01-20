@@ -73,6 +73,14 @@
   justify-content: space-between;
 }
 
+.companylist-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.Setting-select-data-input {
+  padding: 10px 5px !important;
+}
 .companylist-action button {
   padding: 10px 15px;
   /* border-radius: 4px; */

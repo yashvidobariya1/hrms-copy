@@ -1,0 +1,136 @@
+.qr-generator-container {
+  display: flex;
+  height: 86vh;
+  /* align-items: center; */
+  justify-content: center;
+}
+
+.qr-generator-section {
+  display: flex;
+  width: 100%;
+  gap: 20px;
+  padding: 20px;
+  justify-content: space-between;
+}
+.qr-generator-container-flex,
+.qr-display-container {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+}
+.qr-generator-container-flex h1 {
+  font-size: 30px;
+  margin: 22px 0 !important;
+  color: var(--primary-blue);
+}
+
+.generated-code {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 60vh;
+}
+.qr-code {
+  display: flex;
+  justify-content: center;
+}
+.qr-download button {
+  margin-top: 20px;
+  padding: 10px 15px;
+  gap: 20px;
+  padding: 10px 15px;
+  background-color: var(--primary-blue);
+  border: none;
+  cursor: pointer;
+  color: var(--primary-white);
+  display: flex;
+  align-items: center;
+}
+.qr-display-container {
+  border-radius: 4px;
+  /* height: 70vh; */
+}
+
+.qrgenerate-input {
+  width: 75%;
+  box-sizing: border-box;
+  border: 1px solid var(--neutral-light-gray);
+  margin-top: 10px !important;
+}
+.qr-download {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+.qr-generator-container-flex {
+  display: flex;
+  flex-direction: column;
+}
+.qr-generator-container-flex label {
+  font-size: 18px;
+}
+
+.generate-qr-button {
+  display: flex;
+  /* justify-content: center; */
+}
+.generate-qr-button button {
+  padding: 10px 15px;
+  background-color: var(--primary-blue);
+  border: none;
+  cursor: pointer;
+  color: var(--primary-white);
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+}
+@media (max-width: 768px) {
+  .qr-generator-container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .qr-generator-section {
+    flex-direction: column;
+    gap: 0px;
+  }
+
+  .qr-generator-container-flex,
+  .qr-display-container {
+    width: 100%;
+  }
+
+  .generated-code {
+    height: 50vh;
+  }
+
+  .qrgenerate-input {
+    width: 100%;
+  }
+  .qr-generator-container-flex h1 {
+    margin: 16px 0 !important;
+    font-size: 22px;
+  }
+  .qr-generator-container-flex label {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .qr-generator-container {
+    padding: 10px;
+  }
+
+  .generate-qr-button button {
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .qr-download button {
+    padding: 8px 12px;
+    font-size: 16px;
+  }
+  .generated-code {
+    height: auto;
+  }
+}

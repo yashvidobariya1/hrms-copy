@@ -7,8 +7,9 @@ import "./Settings.css";
 import Loader from "../Helper/Loader";
 import { showToast } from "../../main/ToastManager";
 import { MdAddBusiness } from "react-icons/md";
-import Pagination from "../../main/Pagination";
 import DeleteConfirmation from "../../main/DeleteConfirmation";
+import CommonTable from "../../SeparateCom/CommonTable";
+import Pagination from "../../main/Pagination";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -19,16 +20,18 @@ const Settings = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [companyId, setCompanyId] = useState("");
-  const CompaniesPerPage = 10;
-  const indexOfLastCompany = currentPage * CompaniesPerPage;
-  const indexOfFirstCompany = indexOfLastCompany - CompaniesPerPage;
-  const currentCompanies = companyList.slice(
+  const [companiesPerPage, setCompaniesPerPage] = useState(10);
+
+  const totalPages = Math.ceil(companyList.length / companiesPerPage);
+  const indexOfLastCompany = currentPage * companiesPerPage;
+  const indexOfFirstCompany = indexOfLastCompany - companiesPerPage;
+  const currentData = companyList.slice(
     indexOfFirstCompany,
     indexOfLastCompany
   );
-  const totalPages = Math.ceil(companyList.length / CompaniesPerPage);
 
   const handlePageChange = (pageNumber) => {
+    console.log("pagenumber", pageNumber);
     setCurrentPage(pageNumber);
   };
 
@@ -54,12 +57,11 @@ const Settings = () => {
   const GetCompnies = async () => {
     try {
       setLoading(true);
-      const response = await GetCall("/getallcompany");
+      const response = await GetCall("/getAllcompany");
       if (response?.data?.status === 200) {
-        setCompanyList(response?.data?.company);
+        setCompanyList(response?.data?.companies);
       }
       setLoading(false);
-      // console.log("response", response);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -75,7 +77,7 @@ const Settings = () => {
     SetShowdropwornAction(null);
     try {
       setLoading(true);
-      const response = await PostCall(`/deletecompany/${id}`);
+      const response = await PostCall(`/deleteCompany/${id}`);
       if (response?.data?.status === 200) {
         showToast(response?.data?.message, "success");
         navigate("/settings");
@@ -93,11 +95,26 @@ const Settings = () => {
     GetCompnies();
   }, []);
 
+  const tableHeaders = ["Business Name", "Company Code", "City", "Action"];
+  const handleSettingPerPageChange = (e) => {
+    setCompaniesPerPage(parseInt(e.target.value, 10));
+    setCurrentPage(1);
+  };
+
+  const HandleGenerateQrCode = (id) => {
+    navigate(`/settings/Generateqrcode/${id}`);
+  };
+  const settingactions = [
+    { label: "Edit", onClick: HandleEditCompany },
+    { label: "Delete", onClick: HandleDeleteCompany },
+    { label: "Generate QRcode", onClick: HandleGenerateQrCode },
+  ];
+
   return (
     <div className="company-list-container">
       <div className="companylist-flex">
         <div className="companylist-title">
-          <h2>Comapany List</h2>
+          <h2>Company List</h2>
         </div>
         <div className="companylist-action">
           <button onClick={HandleAddCompanyList}>
@@ -112,68 +129,42 @@ const Settings = () => {
           <Loader />
         </div>
       ) : (
-        companyList?.length !== 0 && (
-          <>
-            <table className="company-table">
-              <thead>
-                <tr>
-                  <th>Business Name</th>
-                  <th>Company Code</th>
-                  <th>City</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentCompanies?.map((company) => (
-                  <tr key={company?._id}>
-                    <td>{company?.companyDetails?.businessName}</td>
-                    <td>{company?.companyDetails?.companyCode}</td>
-                    <td>{company?.companyDetails?.city}</td>
-                    <td className="action-buttons">
-                      <div className="dropdown-container">
-                        <SlOptionsVertical
-                          onClick={() => handleAction(company?._id)}
-                          className="action-button"
-                        />
-                        {ShowdropwornAction === company?._id && (
-                          <div className="dropdown-menu">
-                            <button
-                              onClick={() => HandleEditCompany(company?._id)}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() =>
-                                HandleDeleteCompany(
-                                  company?._id,
-                                  company?.companyDetails?.businessName
-                                )
-                              }
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {showConfirm && (
-              <DeleteConfirmation
-                name={companyName}
-                onConfirm={() => confirmDelete(companyId)}
-                onCancel={cancelDelete}
-              />
-            )}
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
+        <>
+          <CommonTable
+            headers={tableHeaders}
+            data={currentData.map((company) => ({
+              _id: company._id,
+              BusinessName: company?.companyDetails?.businessName,
+              CompanyCode: company?.companyDetails?.companyCode,
+              City: company?.companyDetails?.city,
+            }))}
+            actions={{
+              ShowdropwornAction,
+              actionsList: settingactions,
+              onAction: handleAction,
+            }}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            ShowperPage={companiesPerPage}
+            OnPerPageChange={handleSettingPerPageChange}
+            handleAction={handleAction}
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            ShowperPage={companiesPerPage}
+            OnPerPageChange={handleSettingPerPageChange}
+          />
+          {showConfirm && (
+            <DeleteConfirmation
+              name={companyName}
+              onConfirm={() => confirmDelete(companyId)}
+              onCancel={cancelDelete}
             />
-          </>
-        )
+          )}
+        </>
       )}
     </div>
   );

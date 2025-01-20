@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { SlOptionsVertical } from "react-icons/sl";
 import { FaLocationDot } from "react-icons/fa6";
 import { useNavigate } from "react-router";
 import "./Location.css";
-import Pagination from "../../main/Pagination";
 import Loader from "../Helper/Loader";
 import { GetCall, PostCall } from "../../ApiServices";
 import { showToast } from "../../main/ToastManager";
 import DeleteConfirmation from "../../main/DeleteConfirmation";
+import CommonTable from "../../SeparateCom/CommonTable";
+import Pagination from "../../main/Pagination";
 
 const Location = () => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const Location = () => {
   const [locationId, setLocationId] = useState("");
   const [ShowdropwornAction, SetShowdropwornAction] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const locationPerPage = 10;
+  const [locationPerPage, setLocationPerPage] = useState(10);
 
   const handleAction = (id) => {
     SetShowdropwornAction(ShowdropwornAction === id ? null : id);
@@ -30,7 +30,7 @@ const Location = () => {
 
   const indexOfLastLocation = currentPage * locationPerPage;
   const indexOfFirstLocation = indexOfLastLocation - locationPerPage;
-  const currentlocation = locationList?.slice(
+  const currentData = locationList.slice(
     indexOfFirstLocation,
     indexOfLastLocation
   );
@@ -54,9 +54,9 @@ const Location = () => {
   const GetLocations = async () => {
     try {
       setLoading(true);
-      const response = await GetCall("/getalllocation");
+      const response = await GetCall("/getAllLocation");
       if (response?.data?.status === 200) {
-        setLocationList(response?.data?.location);
+        setLocationList(response?.data?.locations);
       } else {
         showToast(response?.data?.message, "error");
       }
@@ -76,12 +76,11 @@ const Location = () => {
     SetShowdropwornAction(null);
     try {
       setLoading(true);
-      const response = await PostCall(`/deletelocation/${id}`);
+      const response = await PostCall(`/deleteLocation/${id}`);
       if (response?.data?.status === 200) {
         showToast(response?.data?.message, "success");
         navigate("/location");
       } else {
-        // console.log(response?.data?.message);
         showToast(response?.data?.message, "error");
       }
       setLoading(false);
@@ -94,6 +93,23 @@ const Location = () => {
   useEffect(() => {
     GetLocations();
   }, []);
+
+  const headers = ["Location Name", "Address", "City", "Post Code", "Action"];
+
+  const handlePerPageChange = (e) => {
+    setLocationPerPage(parseInt(e.target.value, 10));
+    setCurrentPage(1);
+  };
+  const actionsList = [
+    {
+      label: "Edit",
+      onClick: HandleEditLocation,
+    },
+    {
+      label: "Delete",
+      onClick: HandleDeleteLocation,
+    },
+  ];
 
   return (
     <div className="location-list-container">
@@ -114,70 +130,46 @@ const Location = () => {
           <Loader />
         </div>
       ) : (
-        currentlocation?.length !== 0 && (
-          <>
-            <table className="location-table">
-              <thead>
-                <tr>
-                  <th>location Name</th>
-                  <th>Address</th>
-                  <th>City</th>
-                  <th>Post Code</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentlocation?.map((location) => (
-                  <tr key={location._id}>
-                    <td>{location?.locationName}</td>
-                    <td>{location?.address}</td>
-                    <td>{location?.city}</td>
-                    <td>{location?.postcode}</td>
-                    <td className="location-action-buttons">
-                      <div className="location-dropdown-container">
-                        <SlOptionsVertical
-                          onClick={() => handleAction(location?._id)}
-                          className="location-action-button"
-                        />
-                        {ShowdropwornAction === location?._id && (
-                          <div className="location-dropdown-menu">
-                            <button
-                              onClick={() => HandleEditLocation(location?._id)}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() =>
-                                HandleDeleteLocation(
-                                  location?._id,
-                                  location?.locationName
-                                )
-                              }
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {showConfirm && (
-              <DeleteConfirmation
-                name={locationName}
-                onConfirm={() => confirmDelete(locationId)}
-                onCancel={cancelDelete}
-              />
-            )}
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
+        <>
+          <CommonTable
+            headers={headers}
+            data={currentData.map((location) => ({
+              _id: location._id,
+              locationName: location.locationName,
+              address: location.address,
+              city: location.city,
+              postcode: location.postcode,
+            }))}
+            actions={{
+              ShowdropwornAction,
+              actionsList,
+              onEdit: HandleEditLocation,
+              onDelete: HandleDeleteLocation,
+            }}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            showPerPage={locationPerPage}
+            OnPerPageChange={handlePerPageChange}
+            handleAction={handleAction}
+          />
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            ShowperPage={locationPerPage}
+            OnPerPageChange={handlePerPageChange}
+          />
+
+          {showConfirm && (
+            <DeleteConfirmation
+              name={locationName}
+              onConfirm={() => confirmDelete(locationId)}
+              onCancel={cancelDelete}
             />
-          </>
-        )
+          )}
+        </>
       )}
     </div>
   );

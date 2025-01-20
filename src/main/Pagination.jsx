@@ -1,18 +1,38 @@
 import React from "react";
 import "./Pagination.css";
-import { MdArrowBackIosNew, MdOutlineNavigateNext } from "react-icons/md";
+import { MdArrowBackIos, MdArrowForwardIos } from "react-icons/md";
 
-const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+const Pagination = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  ShowperPage,
+  OnPerPageChange,
+}) => {
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
+  const handlePerPageChange = (e) => {
+    OnPerPageChange(e);
+  };
   return (
     <div className="pagination-container">
+      <div className="contracts-per-page">
+        <select
+          value={ShowperPage}
+          onChange={handlePerPageChange}
+          className="Contract-select-data-input"
+        >
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+          <option value={15}>15</option>
+        </select>
+      </div>
       <button
         onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className="Action-button"
       >
-        <MdArrowBackIosNew />
+        <MdArrowBackIos />
       </button>
       {pageNumbers.map((number) => (
         <button
@@ -30,7 +50,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         disabled={currentPage === totalPages}
         className="Action-button"
       >
-        <MdOutlineNavigateNext />
+        <MdArrowForwardIos />
       </button>
     </div>
   );

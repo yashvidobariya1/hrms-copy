@@ -68,9 +68,9 @@ const AddCompany = () => {
         try {
           let response;
           if (id) {
-            response = await PostCall(`/updatecompany/${id}`, data);
+            response = await PostCall(`/updateCompany/${id}`, data);
           } else {
-            response = await PostCall("/addcompany", data);
+            response = await PostCall("/addCompany", data);
           }
           navigate("/settings");
           if (response?.data?.status === 200) {
@@ -237,7 +237,7 @@ const AddCompany = () => {
     const GetCompanyDetails = async (id) => {
       try {
         setLoading(true);
-        const Comapany = await GetCall(`/getcompany/${id}`);
+        const Comapany = await GetCall(`/getCompany/${id}`);
         if (Comapany?.data?.status === 200) {
           setFormData(Comapany?.data?.company);
         } else {

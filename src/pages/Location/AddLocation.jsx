@@ -52,9 +52,9 @@ const AddLocation = () => {
         setLoading(true);
         let response;
         if (id) {
-          response = await PostCall(`/updatelocation/${id}`, formData);
+          response = await PostCall(`/updateLocation/${id}`, formData);
         } else {
-          response = await PostCall("/addlocation", formData);
+          response = await PostCall("/addLocation", formData);
         }
         if (response?.data?.status === 200) {
           showToast(response?.data?.message, "success");
@@ -83,7 +83,7 @@ const AddLocation = () => {
     const GetLocationDetails = async () => {
       try {
         setLoading(true);
-        const response = await GetCall(`/getlocation/${id}`);
+        const response = await GetCall(`/getLocation/${id}`);
         if (response?.data?.status === 200) {
           setFormData(response?.data?.location);
         } else {

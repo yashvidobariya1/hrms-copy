@@ -139,9 +139,9 @@ const AddEmployee = () => {
           // console.log("data", data);
           let response;
           if (id) {
-            response = await PostCall(`/updateemployee/${id}`, data);
+            response = await PostCall(`/updateEmployee/${id}`, data);
           } else {
-            response = await PostCall("/addemployee", data);
+            response = await PostCall("/addEmployee", data);
           }
           if (response?.data?.status === 200) {
             showToast(response?.data?.message, "success");
@@ -348,7 +348,8 @@ const AddEmployee = () => {
         ) {
           newErrors.weeklyWorkingHours = "Weekly Working Hours are required";
         } else if (formData.jobDetails?.weeklyWorkingHours < 1) {
-          newErrors.weeklyWorkingHours = "Weekly working hours must be greater than zero.";
+          newErrors.weeklyWorkingHours =
+            "Weekly working hours must be greater than zero.";
         }
         break;
 
@@ -381,7 +382,7 @@ const AddEmployee = () => {
     const GetEmployeeDetails = async (id) => {
       try {
         setLoading(true);
-        const Employee = await GetCall(`/getemployee/${id}`);
+        const Employee = await GetCall(`/getEmployee/${id}`);
         if (Employee?.data?.status === 200) {
           setFormData(Employee?.data?.employee);
           setDocumentDetails(Employee?.data?.employee?.documentDetails);

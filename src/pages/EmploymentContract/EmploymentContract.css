@@ -1,0 +1,134 @@
+.employee-contract-list-container {
+  padding: 20px;
+  /* max-width: 800px; */
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+}
+
+.employeecontract-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.employeecontract-title {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.Contract-select-data-input {
+  padding: 10px 5px !important;
+}
+
+input,
+select {
+  margin-top: 0px !important;
+}
+.File-input {
+  border: none !important;
+  padding: 0 !important;
+}
+
+.employee-main-container p {
+  color: var(--alert-yellow);
+}
+.employeecontract-action button {
+  padding: 10px 15px;
+  /* border-radius: 4px; */
+  background-color: var(--primary-blue);
+  border: none;
+  cursor: pointer;
+  color: var(--primary-white);
+  display: flex;
+  align-items: center;
+}
+
+.employeecontract-action button:hover {
+  background-color: var(--blue-hover);
+}
+
+.employeecontract-action-icon {
+  margin-right: 10px;
+  font-size: 14px;
+}
+
+.no-data {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+.Employee-flex-file-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+@media (max-width: 500px) {
+  .employeecontract-action button {
+    padding: 6px 10px !important;
+  }
+
+  .employeecontract-title h2 {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1400px) {
+  .company-employee-contract-dropdown-menu {
+    left: -15px;
+  }
+  .employeecontract-title {
+    gap: 5px;
+  }
+}
+
+@media (max-width: 992px) {
+  .employeecontract-flex {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 767px) {
+  .company-employee-contract-dropdown-menu {
+    left: -45px;
+    padding: 8px;
+  }
+  .employeecontract-action button {
+    padding: 9px 12px;
+  }
+  .employeecontract-title {
+    gap: 5px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .employeecontract-title {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .Employee-flex-file-action {
+    align-items: center;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .Employeecontract-input {
+    width: 100%;
+  }
+  .employee-contract-input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 360px) {
+  .Employee-flex-file-action {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

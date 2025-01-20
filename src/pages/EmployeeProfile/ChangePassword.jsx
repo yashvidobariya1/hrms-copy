@@ -81,7 +81,7 @@ const ChangePassword = () => {
       // console.log("Data submitted:", newPassword);
       try {
         setLoading(true);
-        const response = await PostCall(`/updatepassword`, newPassword);
+        const response = await PostCall(`/updatePassword`, newPassword);
         if (response?.data?.status === 200) {
           showToast(response?.data?.message, "success");
           navigate("/dashboard");

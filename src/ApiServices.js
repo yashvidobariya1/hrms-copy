@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const BASE_URL = "http://localhost:3001";
-const BASE_URL = "https://hrms-api-one.vercel.app";
+const BASE_URL = "http://localhost:3001";
+// const BASE_URL = "https://hrms-api-one.vercel.app";
 const Role = localStorage.getItem("userRole");
 
 const getAuthToken = () => {

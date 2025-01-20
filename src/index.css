@@ -48,6 +48,7 @@ h2 {
   --neutral-light-gray: #eaeaea;
   --neutral-dark-blue: #343a40;
   --sidebar-bg: black;
+  --calender-today: #ebf5ff;
   /* Font Families */
   --font-primary: "Roboto", sans-serif;
   --font-secondary: "Lato", sans-serif;

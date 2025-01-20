@@ -128,9 +128,12 @@
 }
 
 .setting-step.completed:not(:last-child)::after {
-  background-color: var(--secondary-teal);
+  background-color: var(--primary-blue);
 }
 
+.setting-step.active {
+  color: var(--primary-blue);
+}
 .setting-step.completed .setting-step-number {
   color: var(--primary-white);
   font-weight: bold;

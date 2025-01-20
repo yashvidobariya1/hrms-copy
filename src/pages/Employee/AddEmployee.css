@@ -135,18 +135,6 @@ label {
   font-weight: bold;
 }
 
-input,
-select,
-textarea {
-  padding: 15px 10px;
-  width: max-content;
-  margin-top: 5px;
-  border: 1px solid var(--neutral-light-gray);
-  font-size: 14px;
-  /* border-radius: 4px; */
-  /* background-color: rgb(240, 240, 240); */
-}
-
 input:focus,
 select:focus,
 textarea:focus {

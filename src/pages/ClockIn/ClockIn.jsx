@@ -53,7 +53,7 @@ const CheckIn = () => {
     );
 
     const fetchTimesheet = async () => {
-      const response = await GetCall(`/getowntimesheet`);
+      const response = await GetCall(`/getOwnTimesheet`);
       try {
         if (response?.data?.status === 200) {
           setTimeSheetData(response?.data?.timesheet?.clockinTime);
@@ -157,7 +157,7 @@ const CheckIn = () => {
         },
         qrData: scanResult,
       };
-      const response = await PostCall(`/clockin`, body);
+      const response = await PostCall(`/clockIn`, body);
       if (response.data.status === 200) {
         const { timesheet } = response.data;
         const now = new Date();
@@ -188,7 +188,7 @@ const CheckIn = () => {
         longitude: location.long,
       },
     };
-    const response = await PostCall(`/clockout`, body);
+    const response = await PostCall(`/clockOut`, body);
     try {
       if (response.data.status === 200) {
         const { timesheet } = response?.data;

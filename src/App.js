@@ -28,6 +28,7 @@ import TimeSheetReport from "./pages/TimeSheetReport/TimeSheetReport";
 import AbsenceReport from "./pages/AbsenceReport/AbsenceReport";
 import AddCompany from "./pages/Settings/AddCompany";
 import Profile from "./pages/EmployeeProfile/Profile";
+import GenerateQRcode from "./pages/GenerateQRcode/GenerateQRcode";
 
 function MainLayout({ children }) {
   const [isCollapsed, setIsCollapsed] = useState([]);
@@ -354,6 +355,18 @@ function App() {
                   allowedRoles={["Superadmin", "Administrator", "Manager"]}
                 >
                   <Candidate />
+                </ProtectedRoute>
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/settings/Generateqrcode/:id"
+            element={
+              <MainLayout>
+                <ProtectedRoute
+                  allowedRoles={["Superadmin", "Administrator", "Manager"]}
+                >
+                  <GenerateQRcode />
                 </ProtectedRoute>
               </MainLayout>
             }
