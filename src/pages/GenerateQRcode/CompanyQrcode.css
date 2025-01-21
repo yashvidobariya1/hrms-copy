@@ -23,12 +23,15 @@
   margin: 22px 0 !important;
   color: var(--primary-blue);
 }
+svg {
+  height: auto;
+  width: auto;
+}
 
 .generated-code {
   display: flex;
   justify-content: center;
-  width: 100%;
-  height: 60vh;
+  width: 80%;
 }
 .qr-code {
   display: flex;
@@ -132,5 +135,16 @@
   }
   .generated-code {
     height: auto;
+  }
+}
+@media (max-width: 768px) {
+  .qr-generator-section {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+@media (max-width: 992px) {
+  .qr-generator-container-flex h1 {
+    font-size: 26px;
   }
 }

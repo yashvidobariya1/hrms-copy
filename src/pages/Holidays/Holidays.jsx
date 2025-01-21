@@ -105,102 +105,10 @@
 
 // export default Viewhours;
 
-import React, { useRef, useState } from "react";
-import QRCode from "react-qr-code";
-import { jsPDF } from "jspdf";
+import React from "react";
 
-const GenerateQRcode = () => {
-  const [inputValue, setInputValue] = useState("");
-  const [QRcode, setQRCode] = useState("");
-  const [formdata, setFormdata] = useState({ QRcode: "" });
-  const [error, setError] = useState("");
-  const qrCodeRef = useRef();
-
-  const handleGenerateQRCode = () => {
-    if (!inputValue.trim()) {
-      setError("Input value cannot be empty.");
-      return;
-    }
-    setError("");
-    setQRCode(inputValue);
-    console.log("inputvalue", inputValue);
-    setFormdata((prevData) => ({ ...prevData, QRcode: inputValue }));
-    console.log("Form submitted with data:", formdata);
-  };
-
-  const handleDownload = () => {
-    const qrCodeSVG = qrCodeRef.current.querySelector("svg");
-    console.log("qrsvg", qrCodeSVG);
-    const svgData = new XMLSerializer().serializeToString(qrCodeSVG);
-    console.log("svgdata", svgData);
-    const canvas = document.createElement("canvas");
-    console.log("canvas", canvas);
-    const ctx = canvas.getContext("2d");
-    console.log("ctx", ctx);
-
-    const img = new Image();
-    img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-
-      const pdf = new jsPDF();
-      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 10, 10, 180, 180);
-      pdf.save("QRCode.pdf");
-    };
-    img.src = `data:image/svg+xml;base64,${btoa(svgData)}`;
-  };
-
-  return (
-    <div style={{ textAlign: "center", padding: "20px" }}>
-      <h2>QR Code Generator</h2>
-      <input
-        type="text"
-        placeholder="Enter value"
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        style={{
-          padding: "10px",
-          fontSize: "16px",
-          width: "80%",
-          margin: "10px auto",
-          display: "block",
-        }}
-      />
-      {error && <p style={{ color: "red", marginTop: "5px" }}>{error}</p>}
-      <button
-        onClick={handleGenerateQRCode}
-        style={{
-          padding: "10px 20px",
-          fontSize: "16px",
-          marginTop: "10px",
-          cursor: "pointer",
-        }}
-      >
-        Generate QR Code
-      </button>
-      <div style={{ marginTop: "20px" }} ref={qrCodeRef}>
-        {QRcode && (
-          <QRCode
-            size={256}
-            style={{ height: "256px", width: "256px", margin: "0 auto" }}
-            value={QRcode}
-          />
-        )}
-      </div>
-      <button
-        onClick={handleDownload}
-        style={{
-          padding: "10px 20px",
-          fontSize: "16px",
-          marginTop: "10px",
-          cursor: "pointer",
-        }}
-      >
-        Download
-      </button>
-    </div>
-  );
+const Holidays = () => {
+  return <div>Holidays</div>;
 };
 
-export default GenerateQRcode;
+export default Holidays;

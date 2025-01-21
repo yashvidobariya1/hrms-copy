@@ -5,10 +5,25 @@ import { MdOutlineNotificationsActive } from "react-icons/md";
 import "./Header.css";
 
 const Header = ({ isCollapsed, setIsCollapsed }) => {
+  const [theme, setTheme] = useState("light");
+  const handleThemeChange = (e) => {
+    const selectedTheme = e.target.value;
+    setTheme(selectedTheme);
+    document.documentElement.setAttribute("data-theme", selectedTheme);
+    localStorage.setItem("theme", selectedTheme);
+  };
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    console.log("local theme", savedTheme);
+    setTheme(savedTheme);
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }, []);
+
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = React.createRef();
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
+  const [user] = useState(JSON.parse(localStorage.getItem("user")));
   const userRole = localStorage.getItem("userRole");
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -68,6 +83,18 @@ const Header = ({ isCollapsed, setIsCollapsed }) => {
               <Link to="/changepassword">
                 <li>Change Password</li>
               </Link>
+              <li>
+                Theme{" "}
+                <select
+                  className="header-theme"
+                  value={theme}
+                  onChange={handleThemeChange}
+                >
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                </select>
+              </li>
+
               <Link to="/" onClick={handleLogout}>
                 <li>Logout</li>
               </Link>

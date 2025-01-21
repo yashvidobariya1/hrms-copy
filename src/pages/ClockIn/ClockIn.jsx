@@ -6,12 +6,12 @@ import "./ClockIn.css";
 import { BsHourglassSplit } from "react-icons/bs";
 import Loader from "../Helper/Loader";
 import { Html5QrcodeScanner } from "html5-qrcode";
-import { isMobile } from "react-device-detect"; // Importing isMobile from react-device-detect
+import { isMobile } from "react-device-detect";
 
 const CheckIn = () => {
   const userId = JSON.parse(localStorage.getItem("userId"));
   const [startTime, setStartTime] = useState(null);
-  const [endTime, setEndTime] = useState(null);
+  const [setEndTime] = useState(null);
   const [timerOn, setTimerOn] = useState(false);
   const [loading] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -19,7 +19,7 @@ const CheckIn = () => {
   const [timeSheetData, setTimeSheetData] = useState([]);
   const [totalWorkingTime, setTotalWorkingTime] = useState("0h 0m 0s");
   const [location, setLocation] = useState({ lat: null, long: null });
-  const [scanResult, setScanResult] = useState("");
+  const [setScanResult] = useState("");
   const [isScannerVisible, setIsScannerVisible] = useState(true);
 
   useEffect(() => {
@@ -157,6 +157,7 @@ const CheckIn = () => {
         },
         qrData: scanResult,
       };
+      console.log("body", body);
       const response = await PostCall(`/clockIn`, body);
       if (response.data.status === 200) {
         const { timesheet } = response.data;

@@ -100,6 +100,11 @@ const Location = () => {
     setLocationPerPage(parseInt(e.target.value, 10));
     setCurrentPage(1);
   };
+
+  const HandleGenerateQrCode = (id) => {
+    navigate(`/location/locationqrcode/${id}`);
+  };
+
   const actionsList = [
     {
       label: "Edit",
@@ -109,6 +114,7 @@ const Location = () => {
       label: "Delete",
       onClick: HandleDeleteLocation,
     },
+    { label: "Generate QRcode", onClick: HandleGenerateQrCode },
   ];
 
   return (

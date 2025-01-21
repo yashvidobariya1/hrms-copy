@@ -30,6 +30,8 @@ const Subheader = () => {
       timesheetreport: "Time Sheet Report",
       job: "Job",
       candidate: "Candidate",
+      companyqrcode: "Generate QRcode",
+      locationqrcode: "Generate QRcode",
     };
 
     const idPattern = /^[a-fA-F0-9]{24}$/;

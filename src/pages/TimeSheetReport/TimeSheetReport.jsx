@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import CommonTable from "../../SeparateCom/CommonTable";
 import Pagination from "../../main/Pagination";
-
+import "./TimeSheetReport.css";
 const TimeSheetReport = () => {
   const headers = ["Clock/In", "Clock/out", "Filename"];
   const employeesPerPage = 10;
@@ -39,9 +39,9 @@ const TimeSheetReport = () => {
     setCurrentPage(1);
   };
   return (
-    <div className="location-list-container">
-      <div className="locationlist-flex">
-        <div className="locationlist-title">
+    <div className="timesheet-list-container">
+      <div className="timesheet-flex">
+        <div className="timesheet-title">
           <h2>Templates</h2>
         </div>
       </div>

@@ -63,6 +63,13 @@ h2 {
   --font-size-small: 14px;
 }
 
+[data-theme="dark"] {
+  --primary-bg: #333333;
+  --primary-text: #ffffff;
+  --secondary-bg: #444444;
+  --secondary-text: #20c997;
+}
+
 label {
   display: block;
   margin-bottom: 5px;
@@ -94,6 +101,13 @@ textarea::placeholder {
   color: var(--input-placeholder);
   font-size: 12px;
   opacity: 1;
+}
+
+[data-theme="dark"] {
+  --primary-bg: #333333;
+  --primary-text: #ffffff;
+  --secondary-bg: #444444;
+  --secondary-text: #20c997;
 }
 
 @media (max-width: 767px) {

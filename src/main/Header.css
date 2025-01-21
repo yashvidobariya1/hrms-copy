@@ -58,7 +58,16 @@
   font-size: 14px;
   font-weight: 300;
 }
-
+.header-theme {
+  background-color: var(--secondary-dark-gray) !important;
+  color: var(--primary-white) !important;
+  padding: 5px;
+  border-radius: 4px;
+  margin: 0 5px;
+}
+.profile-dropdown-menu {
+  color: var(--primary-white);
+}
 @media screen and (max-width: 600px) {
   .header-notification {
     font-size: 22px;

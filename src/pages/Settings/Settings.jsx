@@ -102,8 +102,9 @@ const Settings = () => {
   };
 
   const HandleGenerateQrCode = (id) => {
-    navigate(`/settings/Generateqrcode/${id}`);
+    navigate(`/settings/companyqrcode/${id}`);
   };
+
   const settingactions = [
     { label: "Edit", onClick: HandleEditCompany },
     { label: "Delete", onClick: HandleDeleteCompany },
