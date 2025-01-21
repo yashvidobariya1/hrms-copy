@@ -150,6 +150,7 @@ const CheckIn = () => {
         // scanResult = "default-scan-result";
         return;
       }
+
       const body = {
         userId,
         location: {
