@@ -147,7 +147,8 @@ const CheckIn = () => {
       if (isMobile) {
         scanResult = await scanner();
       } else {
-        scanResult = "default-scan-result";
+        // scanResult = "default-scan-result";
+        return;
       }
       const body = {
         userId,
