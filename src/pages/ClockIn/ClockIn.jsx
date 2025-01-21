@@ -146,6 +146,9 @@ const CheckIn = () => {
       let scanResult = "";
       if (isMobile) {
         scanResult = await scanner();
+        if (!scanResult) {
+          return;
+        }
       } else {
         // scanResult = "default-scan-result";
         return;
