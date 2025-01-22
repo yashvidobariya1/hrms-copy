@@ -147,7 +147,7 @@ const CheckIn = () => {
       if (isMobile) {
         try {
           scanResult = await scanner();
-          console.log("scanresult", scanResult);
+          console.log("scanresults", scanResult);
         } catch (error) {
           console.error("Scanner error", error.message);
           return;
