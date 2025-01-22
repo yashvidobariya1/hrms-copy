@@ -144,21 +144,16 @@ const CheckIn = () => {
 
     try {
       let scanResult = "";
-      // if (isMobile) {
-      try {
-        scanResult = await scanner();
-        console.log("scanresult", scanResult);
-      } catch (error) {
-        console.error("Scanner error", error.message);
-        return;
-      }
-      // } else {
-      //   console.log("only mobile device detected.", scanResult);
-      // }
-
-      if (!scanResult) {
-        showToast("Invalid scan result. Please try again..", "error");
-        return;
+      if (isMobile) {
+        try {
+          scanResult = await scanner();
+          console.log("scanresult", scanResult);
+        } catch (error) {
+          console.error("Scanner error", error.message);
+          return;
+        }
+      } else {
+        scanResult = "default-scan-result";
       }
 
       const body = {
