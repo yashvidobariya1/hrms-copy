@@ -145,12 +145,18 @@ const CheckIn = () => {
     try {
       let scanResult = "";
       if (isMobile) {
-        scanResult = await scanner();
-        if (!scanResult) {
+        try {
+          scanResult = await scanner();
+        } catch (error) {
+          console.error("Scanner error:", error.message);
           return;
         }
       } else {
-        // scanResult = "default-scan-result";
+        scanResult = "default-scan-result";
+      }
+
+      if (!scanResult) {
+        showToast("Invalid scan result. Please try again.", "error");
         return;
       }
 
