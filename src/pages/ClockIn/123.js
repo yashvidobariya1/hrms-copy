@@ -11,7 +11,7 @@ import { isMobile } from "react-device-detect";
 const CheckIn = () => {
   const userId = JSON.parse(localStorage.getItem("userId"));
   const [startTime, setStartTime] = useState(null);
-  const [endTime, setEndTime] = useState(null);
+  const [setEndTime] = useState(null);
   const [timerOn, setTimerOn] = useState(false);
   const [loading] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -23,7 +23,6 @@ const CheckIn = () => {
   const [isScannerVisible, setIsScannerVisible] = useState(true);
 
   useEffect(() => {
-    console.log("ismobile==>", isMobile);
     const savedStartTime = localStorage.getItem("startTime");
     const savedElapsedTime = localStorage.getItem("elapsedTime");
     const savedTotalWorkingTime =
@@ -97,44 +96,62 @@ const CheckIn = () => {
     return new Promise((resolve, reject) => {
       setIsScannerVisible(true);
 
-      setTimeout(() => {
-        navigator.permissions
-          .query({ name: "camera" })
-          .then((permissionStatus) => {
-            console.log("Camera permission state: ", permissionStatus.state); // Add logging here
-            if (permissionStatus.state === "granted") {
-              const scannerInstance = new Html5QrcodeScanner(
-                "scanner-visible",
-                {
-                  qrbox: { width: 300, height: 300 },
-                  fps: 10,
-                }
-              );
+      const initializeScanner = () => {
+        try {
+          const scannerInstance = new Html5QrcodeScanner("scanner-visible", {
+            qrbox: { width: 250, height: 250 },
+            fps: 5,
+          });
 
-              const success = (result) => {
-                setScanResult(result);
-                setIsScannerVisible(false);
-                scannerInstance.clear();
-                resolve(result);
-              };
+          const success = (result) => {
+            setScanResult(result);
+            setIsScannerVisible(false);
+            scannerInstance.clear();
+            resolve(result);
+          };
 
-              scannerInstance.render(success);
-            } else {
-              const errorMessage =
-                "Camera permission is required to scan QR code.";
-              showToast(errorMessage, "error");
-              reject(new Error(errorMessage));
-            }
-          })
-          .catch((err) => {
-            console.error("Error checking camera permission:", err);
+          scannerInstance.render(success);
+        } catch (error) {
+          console.error("Error initializing scanner:", error);
+          showToast("Unable to access the camera for scanning.", "error");
+          setIsScannerVisible(false);
+          reject(new Error("Scanner initialization failed."));
+        }
+      };
+
+      navigator.permissions
+        .query({ name: "camera" })
+        .then((permissionStatus) => {
+          if (permissionStatus.state === "granted") {
+            initializeScanner();
+          } else if (permissionStatus.state === "prompt") {
+            showToast("Camera permission is required to scan QR code.", "info");
+          } else {
             showToast(
-              "An error occurred while checking camera permissions.",
+              "Camera access denied. Please enable it in your browser settings.",
               "error"
             );
-            reject(err);
-          });
-      }, 0);
+          }
+
+          permissionStatus.onchange = () => {
+            if (permissionStatus.state === "granted") {
+              initializeScanner();
+            } else if (permissionStatus.state === "denied") {
+              showToast(
+                "Camera access denied. Please enable it in your browser settings.",
+                "error"
+              );
+            }
+          };
+        })
+        .catch((error) => {
+          console.error("Error checking camera permission:", error);
+          showToast(
+            "An error occurred while checking camera permissions.",
+            "error"
+          );
+          reject(error);
+        });
     });
   };
 
@@ -148,6 +165,7 @@ const CheckIn = () => {
       let scanResult = "";
       if (isMobile) {
         try {
+          console.log("check device");
           scanResult = await scanner();
           console.log("scanresult", scanResult);
         } catch (error) {
@@ -155,7 +173,7 @@ const CheckIn = () => {
           return;
         }
       } else {
-        console.log("only mobile device detected.", scanResult);
+        console.log("Non-mobile device detected, skipping QR scan.");
       }
 
       const body = {
@@ -164,12 +182,13 @@ const CheckIn = () => {
           latitude: location.lat,
           longitude: location.long,
         },
-        qrData: scanResult,
+        qrData: scanResult || "",
       };
       console.log("body", body);
       const response = await PostCall(`/clockIn`, body);
       if (response.data.status === 200) {
         const { timesheet } = response.data;
+        console.log("response", response.data);
         const now = new Date();
         setStartTime(now);
         setEndTime(null);
