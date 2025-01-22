@@ -149,7 +149,7 @@ const CheckIn = () => {
           scanResult = await scanner();
           console.log("scanresult", scanResult);
         } catch (error) {
-          console.error("Scanner error:", error.message);
+          console.error("Scanner error", error.message);
           return;
         }
       } else {
