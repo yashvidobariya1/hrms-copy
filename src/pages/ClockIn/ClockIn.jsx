@@ -157,7 +157,7 @@ const CheckIn = () => {
       }
 
       if (!scanResult) {
-        showToast("Invalid scan result. Please try again.", "error");
+        showToast("Invalid scan result. Please try again..", "error");
         return;
       }
 
