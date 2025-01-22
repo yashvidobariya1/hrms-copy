@@ -95,13 +95,16 @@ const CheckIn = () => {
   const checkCameraPermission = async () => {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
-      console.log("device", devices);
+      console.log("Devices:", devices);
       const videoInputDevices = devices.filter(
         (device) => device.kind === "videoinput"
       );
       if (videoInputDevices.length === 0) {
         throw new Error("No camera devices found.");
       }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach((track) => track.stop());
       return true;
     } catch (error) {
       console.error("Error checking camera permission:", error);
@@ -109,38 +112,102 @@ const CheckIn = () => {
     }
   };
 
+  // const scanner = () => {
+  //   return new Promise(async (resolve, reject) => {
+  //     setIsScannerVisible(true);
+
+  //     const hasCameraPermission = await checkCameraPermission();
+  //     console.log("hasCameraPermission", hasCameraPermission);
+  //     if (!hasCameraPermission) {
+  //       const errorMessage = "Camera permission is required to scan QR code.";
+  //       showToast(errorMessage, "error");
+  //       setIsScannerVisible(false);
+  //       return reject(new Error(errorMessage));
+  //     }
+
+  //     try {
+  //       const scannerInstance = new Html5QrcodeScanner("scanner-visible", {
+  //         qrbox: { width: "100%", height: "100%" },
+  //         fps: 5,
+  //       });
+
+  //       const success = (result) => {
+  //         setScanResult(result);
+  //         setIsScannerVisible(false);
+  //         scannerInstance.clear();
+  //         resolve(result);
+  //       };
+
+  //       scannerInstance.render(success);
+  //     } catch (error) {
+  //       console.error("Error initializing scanner:", error);
+  //       setIsScannerVisible(false);
+  //       reject(error);
+  //     }
+  //   });
+  // };
+
   const scanner = () => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       setIsScannerVisible(true);
 
-      const hasCameraPermission = await checkCameraPermission();
-      console.log("hasCameraPermission", hasCameraPermission);
-      if (!hasCameraPermission) {
-        const errorMessage = "Camera permission is required to scan QR code.";
-        showToast(errorMessage, "error");
-        setIsScannerVisible(false);
-        return reject(new Error(errorMessage));
-      }
+      setTimeout(() => {
+        navigator.permissions
+          .query({ name: "camera" })
+          .then((permissionStatus) => {
+            if (permissionStatus.state === "granted") {
+              try {
+                const scannerInstance = new Html5QrcodeScanner(
+                  "scanner-visible",
+                  {
+                    qrbox: { width: "100%", height: "100%" },
+                    fps: 5,
+                  }
+                );
 
-      try {
-        const scannerInstance = new Html5QrcodeScanner("scanner-visible", {
-          qrbox: { width: "100%", height: "100%" },
-          fps: 5,
-        });
+                const success = (result) => {
+                  setScanResult(result);
+                  setIsScannerVisible(false);
+                  scannerInstance.clear();
+                  resolve(result);
+                };
 
-        const success = (result) => {
-          setScanResult(result);
-          setIsScannerVisible(false);
-          scannerInstance.clear();
-          resolve(result);
-        };
+                const error = (error) => {
+                  console.error("QR code scanning failed:", error);
+                  showToast("Failed to scan QR code. Try again.", "error");
+                  scannerInstance.clear();
+                  setIsScannerVisible(false);
+                  reject(new Error("QR code scanning failed."));
+                };
 
-        scannerInstance.render(success);
-      } catch (error) {
-        console.error("Error initializing scanner:", error);
-        setIsScannerVisible(false);
-        reject(error);
-      }
+                scannerInstance.render(success, error);
+              } catch (error) {
+                console.error("Error initializing QR code scanner:", error);
+                showToast(
+                  "An error occurred while opening the scanner. Try again.",
+                  "error"
+                );
+                setIsScannerVisible(false);
+                reject(error);
+              }
+            } else {
+              const errorMessage =
+                "Camera permission is required to scan QR code.";
+              showToast(errorMessage, "error");
+              setIsScannerVisible(false);
+              reject(new Error(errorMessage));
+            }
+          })
+          .catch((err) => {
+            console.error("Error checking camera permission:", err);
+            showToast(
+              "An error occurred while checking camera permissions.",
+              "error"
+            );
+            setIsScannerVisible(false);
+            reject(err);
+          });
+      }, 0);
     });
   };
 
@@ -161,7 +228,7 @@ const CheckIn = () => {
           return;
         }
       } else {
-        scanResult = "default-scan-result";
+        console.log("Non-mobile device detected, skipping QR scan.");
       }
 
       const body = {
