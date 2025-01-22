@@ -147,6 +147,7 @@ const CheckIn = () => {
       if (isMobile) {
         try {
           scanResult = await scanner();
+          console.log("scanresult", scanResult);
         } catch (error) {
           console.error("Scanner error:", error.message);
           return;
@@ -237,7 +238,6 @@ const CheckIn = () => {
         {moment().format("llll")}
       </h2>
 
-      {/* Display QR scanner only if on mobile */}
       {isMobile && isScannerVisible && <div id="scanner-visible"></div>}
 
       <div className="button-container">
