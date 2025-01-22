@@ -144,17 +144,17 @@ const CheckIn = () => {
 
     try {
       let scanResult = "";
-      if (isMobile) {
-        try {
-          scanResult = await scanner();
-          console.log("scanresult", scanResult);
-        } catch (error) {
-          console.error("Scanner error", error.message);
-          return;
-        }
-      } else {
-        scanResult = "default-scan-result";
+      // if (isMobile) {
+      try {
+        scanResult = await scanner();
+        console.log("scanresult", scanResult);
+      } catch (error) {
+        console.error("Scanner error", error.message);
+        return;
       }
+      // } else {
+      //   console.log("only mobile device detected.", scanResult);
+      // }
 
       if (!scanResult) {
         showToast("Invalid scan result. Please try again..", "error");
@@ -238,7 +238,7 @@ const CheckIn = () => {
         {moment().format("llll")}
       </h2>
 
-      {isMobile && isScannerVisible && <div id="scanner-visible"></div>}
+      {isScannerVisible && <div id="scanner-visible"></div>}
 
       <div className="button-container">
         <button onClick={handleClockIn} className="clock-in-btn">
